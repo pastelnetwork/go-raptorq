@@ -1,7 +1,9 @@
 package defaults
 
-import "github.com/harmony-one/go-raptorq/pkg/raptorq"
-import "github.com/harmony-one/go-raptorq/internal/impl/libraptorq"
+import (
+	"github.com/pastelnetwork/go-raptorq/internal/impl/libraptorq"
+	"github.com/pastelnetwork/go-raptorq/pkg/raptorq"
+)
 
 // DefaultEncoderFactory is the default encoder factory.
 func DefaultEncoderFactory() raptorq.EncoderFactory {

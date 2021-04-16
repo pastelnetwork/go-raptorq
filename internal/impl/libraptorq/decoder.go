@@ -4,9 +4,9 @@ import (
 	"errors"
 	"runtime"
 
-	"github.com/harmony-one/go-raptorq/internal/impl/libraptorq/swig"
-	"github.com/harmony-one/go-raptorq/internal/readyblockchan"
-	"github.com/harmony-one/go-raptorq/pkg/raptorq"
+	"github.com/pastelnetwork/go-raptorq/internal/impl/libraptorq/swig"
+	"github.com/pastelnetwork/go-raptorq/internal/readyblockchan"
+	"github.com/pastelnetwork/go-raptorq/pkg/raptorq"
 )
 
 // DecoderFactory is a factory of libRaptorQ-based decoder instances.
