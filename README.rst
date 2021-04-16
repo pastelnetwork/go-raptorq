@@ -1,3 +1,17 @@
+
+Usage notes
+=======================
+
+Library depends on swig utility. It should be downloaded and available in user's PATH during compilation.
+
+Windows
+
+Pre-built swig executable for Windows is compatible with MSYS2 mingw toolchain (and not compatible with TDM-GCC-64).
+Follow MSYS2 installation instructions to install mingw compiler with `pacman`.
+Add gcc.exe location ( by default, it's `C:\\msys64\\mingw64\\bin` ) to the PATH variable.
+
+
+
 What Is ``go-raptorq``?
 =======================
 ``go-raptorq`` implements the `RaptorQ`_ error correction code as defined in
