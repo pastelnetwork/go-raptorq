@@ -44,9 +44,6 @@ RaptorQ is useful for a variety of purposes, including but not limited to:
   of parity disks in RAID arrays—can be scaled up or down on demand without
   having to re-code contents on the existing disks.
 
-We at `Harmony`_ are developing and using ``go-raptorq`` in order to implement a
-near-optimal, adversary-resilient, and stable-latency message broadcasting
-mechanism for use in our highly scalable and performant blockchain network.
 
 Using ``go-raptorq``
 ====================
