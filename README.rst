@@ -10,6 +10,12 @@ Pre-built swig executable for Windows is compatible with MSYS2 mingw toolchain (
 Follow MSYS2 installation instructions to install mingw compiler with `pacman`.
 Add gcc.exe location ( by default, it's `C:\\msys64\\mingw64\\bin` ) to the PATH variable.
 
+Unix
+
+Install swig executable from package manager.
+
+``sudo apt-get install swig``
+
 
 
 What Is ``go-raptorq``?
