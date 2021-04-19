@@ -16,6 +16,12 @@ Install swig executable from package manager.
 
 ``sudo apt-get install swig``
 
+MacOS
+
+Compile or run it with with passing `-std=c++11` flag to clang:
+
+``CGO_CXXFLAGS='-std=c++11' go run .``
+
 
 
 What Is ``go-raptorq``?
