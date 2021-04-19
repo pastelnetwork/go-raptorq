@@ -2,7 +2,7 @@
 Usage notes
 =======================
 
-Library depends on swig utility. It should be downloaded and available in user's PATH during compilation.
+Library depends on swig utility. It should be `downloaded`_ and available in user's PATH during compilation.
 
 Windows
 
@@ -164,3 +164,4 @@ with the terms and conditions of the above mentioned IPR disclosure.
 .. _IETF IPR Disclosure ID #2554: https://datatracker.ietf.org/ipr/2554/
 .. _fountain code: https://en.wikipedia.org/wiki/Fountain_code
 .. _Harmony: https://harmony.one/
+.. _downloaded: http://www.swig.org/download.html
