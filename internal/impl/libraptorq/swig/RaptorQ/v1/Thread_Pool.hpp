@@ -94,8 +94,16 @@ public:
 
         _cond.notify_all();
         std::unique_lock<std::mutex> pool_lock (_pool_mtx);
-        while (_pool.size() != 0 || _exiting.size() != 0)
+#if defined(_WIN32)
+        // On Windows with MSYS2 MinGW toolchain the threads moved to _exiting don't receive _cond.notify_all()
+        // and remain locked waiting for condition's event. Current workaround to avoid infinite awaiting
+        // is to not await for _exiting threads.
+        while (_pool.size() != 0 /*|| _exiting.size() != 0*/) {
+#else
+        while (_pool.size() != 0 || _exiting.size() != 0) {
+#endif
             _cond.wait (pool_lock);
+        }
     }
 
     inline static Thread_Pool& get()
