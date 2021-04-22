@@ -287,7 +287,7 @@ struct abs2_impl_default<Scalar, true> // IsComplex
   EIGEN_DEVICE_FUNC
   static inline RealScalar run(const Scalar& x)
   {
-    return x.real()*x.real() + x.imag()*x.imag();
+    return real(x)*real(x) + imag(x)*imag(x);
   }
 };
 
@@ -313,17 +313,14 @@ struct abs2_retval
 ****************************************************************************/
 
 template<typename Scalar, bool IsComplex>
-struct norm1_default_impl;
-
-template<typename Scalar>
-struct norm1_default_impl<Scalar,true>
+struct norm1_default_impl
 {
   typedef typename NumTraits<Scalar>::Real RealScalar;
   EIGEN_DEVICE_FUNC
   static inline RealScalar run(const Scalar& x)
   {
     EIGEN_USING_STD_MATH(abs);
-    return abs(x.real()) + abs(x.imag());
+    return abs(real(x)) + abs(imag(x));
   }
 };
 
@@ -351,7 +348,31 @@ struct norm1_retval
 * Implementation of hypot                                                *
 ****************************************************************************/
 
-template<typename Scalar> struct hypot_impl;
+template<typename Scalar>
+struct hypot_impl
+{
+  typedef typename NumTraits<Scalar>::Real RealScalar;
+  static inline RealScalar run(const Scalar& x, const Scalar& y)
+  {
+    EIGEN_USING_STD_MATH(abs);
+    EIGEN_USING_STD_MATH(sqrt);
+    RealScalar _x = abs(x);
+    RealScalar _y = abs(y);
+    Scalar p, qp;
+    if(_x>_y)
+    {
+      p = _x;
+      qp = _y / p;
+    }
+    else
+    {
+      p = _y;
+      qp = _x / p;
+    }
+    if(p==RealScalar(0)) return RealScalar(0);
+    return p * sqrt(RealScalar(1) + qp*qp);
+  }
+};
 
 template<typename Scalar>
 struct hypot_retval
@@ -474,7 +495,7 @@ namespace std_fallback {
     typedef typename NumTraits<Scalar>::Real RealScalar;
     EIGEN_USING_STD_MATH(log);
     Scalar x1p = RealScalar(1) + x;
-    return numext::equal_strict(x1p, Scalar(1)) ? x : x * ( log(x1p) / (x1p - RealScalar(1)) );
+    return ( x1p == Scalar(1) ) ? x : x * ( log(x1p) / (x1p - RealScalar(1)) );
   }
 }
 
@@ -619,28 +640,21 @@ template<typename Scalar>
 struct random_default_impl<Scalar, false, true>
 {
   static inline Scalar run(const Scalar& x, const Scalar& y)
-  {
-    if (y <= x)
+  { 
+    typedef typename conditional<NumTraits<Scalar>::IsSigned,std::ptrdiff_t,std::size_t>::type ScalarX;
+    if(y<x)
       return x;
-    // ScalarU is the unsigned counterpart of Scalar, possibly Scalar itself.
-    typedef typename make_unsigned<Scalar>::type ScalarU;
-    // ScalarX is the widest of ScalarU and unsigned int.
-    // We'll deal only with ScalarX and unsigned int below thus avoiding signed
-    // types and arithmetic and signed overflows (which are undefined behavior).
-    typedef typename conditional<(ScalarU(-1) > unsigned(-1)), ScalarU, unsigned>::type ScalarX;
-    // The following difference doesn't overflow, provided our integer types are two's
-    // complement and have the same number of padding bits in signed and unsigned variants.
-    // This is the case in most modern implementations of C++.
-    ScalarX range = ScalarX(y) - ScalarX(x);
-    ScalarX offset = 0;
-    ScalarX divisor = 1;
-    ScalarX multiplier = 1;
-    const unsigned rand_max = RAND_MAX;
-    if (range <= rand_max) divisor = (rand_max + 1) / (range + 1);
-    else                   multiplier = 1 + range / (rand_max + 1);
-    // Rejection sampling.
+    // the following difference might overflow on a 32 bits system,
+    // but since y>=x the result converted to an unsigned long is still correct.
+    std::size_t range = ScalarX(y)-ScalarX(x);
+    std::size_t offset = 0;
+    // rejection sampling
+    std::size_t divisor = 1;
+    std::size_t multiplier = 1;
+    if(range<RAND_MAX) divisor = (std::size_t(RAND_MAX)+1)/(range+1);
+    else               multiplier = 1 + range/(std::size_t(RAND_MAX)+1);
     do {
-      offset = (unsigned(std::rand()) * multiplier) / divisor;
+      offset = (std::size_t(std::rand()) * multiplier) / divisor;
     } while (offset > range);
     return Scalar(ScalarX(x) + offset);
   }
@@ -665,8 +679,8 @@ struct random_default_impl<Scalar, true, false>
 {
   static inline Scalar run(const Scalar& x, const Scalar& y)
   {
-    return Scalar(random(x.real(), y.real()),
-                  random(x.imag(), y.imag()));
+    return Scalar(random(real(x), real(y)),
+                  random(imag(x), imag(y)));
   }
   static inline Scalar run()
   {
@@ -919,9 +933,6 @@ inline EIGEN_MATHFUNC_RETVAL(abs2, Scalar) abs2(const Scalar& x)
   return EIGEN_MATHFUNC_IMPL(abs2, Scalar)::run(x);
 }
 
-EIGEN_DEVICE_FUNC
-inline bool abs2(bool x) { return x; }
-
 template<typename Scalar>
 EIGEN_DEVICE_FUNC
 inline EIGEN_MATHFUNC_RETVAL(norm1, Scalar) norm1(const Scalar& x)
@@ -1019,8 +1030,7 @@ inline int log2(int x)
 
 /** \returns the square root of \a x.
   *
-  * It is essentially equivalent to
-  * \code using std::sqrt; return sqrt(x); \endcode
+  * It is essentially equivalent to \code using std::sqrt; return sqrt(x); \endcode,
   * but slightly faster for float/double and some compilers (e.g., gcc), thanks to
   * specializations when SSE is enabled.
   *
